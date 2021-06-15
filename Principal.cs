@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -58,23 +59,51 @@ namespace Elevator_Simulator
 
         private void MoveElevator(EElevatorAction action)
         {
+            var current = Floors.Where(obj => obj.Key == ElevatorBreak).FirstOrDefault().Value;
+            var nextUp = Floors.Where(obj => obj.Key == ElevatorBreak + 1).FirstOrDefault().Value;
+            var nextDown = Floors.Where(obj => obj.Key == ElevatorBreak - 1).FirstOrDefault().Value;
+
             switch (action)
             {
                 case EElevatorAction.MoveUp:
                     if (ElevatorBreak == LASTFLOOR)
                         break;
-                    pbxElevator.Location = Floors.Where(obj => obj.Key == ElevatorBreak + 1).FirstOrDefault().Value;
+                    Animation(current, nextUp);
                     ElevatorBreak ++;
                     break;
                 case EElevatorAction.MoveDown:
                     if (ElevatorBreak == FIRSTFLOOR)
                         break;
-                    pbxElevator.Location = Floors.Where(obj => obj.Key == ElevatorBreak - 1).FirstOrDefault().Value;
+                    Animation(current, nextDown);
                     ElevatorBreak --;
                     break;
                 default:
                     break;
             }
+        }
+
+        private void Animation(Point current, Point next)
+        {
+            var movimentationTime = 10;
+
+            var action = current.Y > next.Y
+                ? EElevatorAction.MoveUp
+                : EElevatorAction.MoveDown;
+
+            if (action ==  EElevatorAction.MoveUp)
+                for (int YAxix = current.Y ; YAxix >= next.Y ; YAxix --)
+                {
+                    Thread.Sleep(movimentationTime);
+                    pbxElevator.Location = new Point(current.X, YAxix);
+                }
+
+            if (action == EElevatorAction.MoveDown)
+                for (int YAxix = current.Y; YAxix <= next.Y; YAxix ++)
+                {
+                    Thread.Sleep(movimentationTime);
+                    pbxElevator.Location = new Point(current.X, YAxix);
+                }
+
         }
         #endregion
     }
